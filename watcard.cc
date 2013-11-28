@@ -8,6 +8,6 @@ void WATCard::deposit(unsigned int amount) {
 }
 
 void WATCard::withdraw(unsigned int amount) {
-    assert(amount < m_balance);
+    assert(amount <= m_balance);
     uFetchAdd(m_balance, -amount);
 }
