@@ -6,6 +6,8 @@ private:
     // Not implemented to prevent copying.
     Noncopyable(const Noncopyable&);
     void operator=(const Noncopyable&);
+public:
+    Noncopyable(){}
 };
 
 #endif

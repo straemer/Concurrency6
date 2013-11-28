@@ -1,6 +1,10 @@
 #ifndef WATCARD_H__
 #define WATCARD_H__
 
+#include "noncopyable.h"
+
+#include <uFuture.h>
+
 class WATCard : private Noncopyable {
 public:
     WATCard();

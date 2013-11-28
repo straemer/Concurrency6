@@ -1,9 +1,13 @@
 #ifndef VENDING_MACHINES_H__
 #define VENDING_MACHINES_H__
 
+_Monitor Printer;
+_Task NameServer;
+class WATCard;
+
 _Task VendingMachine {
 public:
-    enum Flavours { ... };                 // flavours of soda (YOU DEFINE)
+    enum Flavours { };                 // flavours of soda (YOU DEFINE)
     enum Status {
         BUY, // Successful Buy
         STOCK, // Out of stock
