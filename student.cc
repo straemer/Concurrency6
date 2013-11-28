@@ -17,15 +17,19 @@ Student::Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice
 void Student::main() {
     while (bottlesPurchased < bottlesToPurchase) {
         yield(g_mprng(1, 10));  // yield between 1 and 10
-        try {
-            VendingMachine::Status status = machine->buy(favouriteFlavour, *fcard());   // attempt to buy and store status
-        }
-        retry (Lost) {
-            fCard = cardOffice.create(id, 5);
-        }
+        bool retrying = false;
+        VendingMachine::Status status;
+        do {
+            try {
+                status = machine->buy(favouriteFlavour, *fCard());   // attempt to buy and store status
+            } catch (WATCardOffice::Lost) {
+                fCard = cardOffice.create(id, 5);
+                retrying = true;
+            }
+        } while (retrying);
         switch (status) {
             case VendingMachine::BUY:
-                prt.print(Printer::Student, id, 'B', fcard->getBalance());
+                prt.print(Printer::Student, id, 'B', fCard()->getBalance());
                 bottlesPurchased++;     // increment bottles purchased
                 break;
             case VendingMachine::STOCK:
@@ -33,7 +37,7 @@ void Student::main() {
                 prt.print(Printer::Student, id, 'V', machine->getId());
                 break;
             case VendingMachine::FUNDS:
-                fCard = cardOffice.transfer(id, machine->cost + 5, fcard());  // transfer 5 + cost to watcard
+                fCard = cardOffice.transfer(id, machine->cost() + 5, fCard());  // transfer 5 + cost to watcard
                 break;
         }
     }
