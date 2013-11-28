@@ -11,7 +11,7 @@ public:
     };
     VendingMachine(Printer &prt, NameServer &nameServer, unsigned int id, unsigned int sodaCost,
                    unsigned int maxStockPerFlavour);
-    Status buy( Flavours flavour, WATCard &card );
+    Status buy(Flavours flavour, WATCard &card);
     unsigned int *inventory();
     void restocked();
     _Nomutex unsigned int cost();
