@@ -1,2 +1,7 @@
 # emacs temp files:
 *~
+
+# binary files from make
+*.d
+*.o
+soda
