@@ -11,7 +11,9 @@ public:
     typedef Future_ISM<WATCard *> FWATCard; // future watcard pointer
     void deposit(unsigned int amount);
     void withdraw(unsigned int amount);
-    unsigned int getBalance();
+    inline unsigned int getBalance() { return m_balance; }
+private:
+    unsigned m_balance;
 };
 
 #endif
