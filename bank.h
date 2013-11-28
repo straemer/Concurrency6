@@ -6,11 +6,13 @@
 _Monitor Bank {
 public:
     Bank(unsigned int numStudents);
+    virtual ~Bank();
     void deposit(unsigned int id, unsigned int amount);
     void withdraw(unsigned int id, unsigned int amount);
 private:
+    friend void testBank(); // Friend for unit tests
     std::vector<unsigned> m_balances;
-    std::vector<uCondition> m_withdrawWaiters;
+    uCondition *m_withdrawWaiters;
 };
 
 #endif

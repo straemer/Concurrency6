@@ -2,7 +2,11 @@
 
 Bank::Bank(unsigned int numStudents) :
     m_balances(numStudents, 0),
-    m_withdrawWaiters(numStudents) {}
+    m_withdrawWaiters(new uCondition[numStudents]) {}
+
+Bank::~Bank() {
+    delete [] m_withdrawWaiters;
+}
 
 void Bank::deposit(unsigned int id, unsigned int amount) {
     m_balances[id] += amount;
