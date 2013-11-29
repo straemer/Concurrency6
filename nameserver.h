@@ -16,7 +16,7 @@ private:
     Printer &prt;
     VendingMachine **machineList;
     int *machineForStudent;
-    uCondition waiting;
+    uCondition *waiting;
     
     void main();
 };

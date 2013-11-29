@@ -6,26 +6,25 @@ NameServer::NameServer(Printer &prt, unsigned int numVendingMachines, unsigned i
     prt.print(Printer::NameServer, 'S');
     machineList = new VendingMachine*[numVendingMachines];
     for (unsigned int i = 0; i < numVendingMachines; i++) {
-        machineList[i] = NULL;                                              // all values intially point to NULL
+        machineList[i] = NULL;                                                  // all values intially point to NULL
     }
-    machineForStudent = new int[numStudents];                               // array mapping student to machine
+    machineForStudent = new int[numStudents];                                   // array mapping student to machine
     for (unsigned int i = 0; i < numStudents; i++) {
-        machineForStudent[i] = i % numVendingMachines;                      // loop through student and assign students to machines
+        machineForStudent[i] = i % numVendingMachines;                          // loop through student and assign students to machines
     }
+    waiting = new uCondition[numVendingMachines];                               // condition for each machine
 }
 
 void NameServer::VMregister(VendingMachine *vendingmachine) {
     unsigned int machineId = vendingMachine->getId();                           // to reduce the number of times we call this function
     machineList[machineId] = vendingMachine;
     prt.print(Printer::NameServer, 'R', machineId);
-    while (!waiting.empty()) {                                                  // if there are any students waiting for the machine to be created
-        waiting.signal();                                                       // unblock students
-    }
+    waiting[machineId].signal();
 }
 
 VendingMachine *NameServer::getMachine(unsigned int id) {
     machineForStudent[id] = (machineForStudent[id] + 1) % machineList.size();   // go to the next machine
-    while (!machineList[machineForStudent[id]]) {                               // could've used if, but while is easier
+    if (!machineList[machineForStudent[id]]) {                                  // could've used if, but while is easier
         waiting.wait();                                                         // block if machine is not registered yet
     }
     prt.print(Printer::NameServer, 'N', id, machineForStudent[id]);
@@ -33,6 +32,11 @@ VendingMachine *NameServer::getMachine(unsigned int id) {
 }
 
 VendingMachine **NameServer::getMachineList() {
+    for (unsigned int i = 0; i < machineList.size(); i++) {                     // make sure all machines are registered
+        if (!machineList[i]) {
+            waiting[i].wait();                                                  // block if NULL
+        }
+    }
     return machineList;
 }
 
@@ -41,7 +45,8 @@ void NameServer::main() {
 }
 
 void NameServer::~NameServer() {
-    delete machineList;
-    delete machineForStudent;
+    delete waiting[];
+    delete machineList[];
+    delete machineForStudent[];
     prt.print(Printer::NameServer, 'F');
 }
