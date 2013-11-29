@@ -22,7 +22,9 @@ void NameServer::VMregister(VendingMachine *vendingMachine) {
     unsigned int machineId = vendingMachine->getId();                           // to reduce the number of times we call this function
     machineList[machineId] = vendingMachine;
     prt.print(Printer::NameServer, 'R', machineId);
-    waiting[machineId].signal();
+    while (!waiting[machineId].empty()) {
+        waiting[machineId].signal();
+    }
 }
 
 VendingMachine *NameServer::getMachine(unsigned int id) {
