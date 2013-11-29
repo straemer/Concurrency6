@@ -13,7 +13,7 @@ _Task Student {
 public:
     Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id,
             unsigned int maxPurchases);
-
+private:
     Printer &prt;
     NameServer &nameServer;
     WATCardOffice &cardOffice;
@@ -23,7 +23,7 @@ public:
     unsigned int bottlesPurchased;
     unsigned int bottlesToPurchase;
     VendingMachine::Flavours favouriteFlavour;
-private:
+    
     void main();
 };
 
