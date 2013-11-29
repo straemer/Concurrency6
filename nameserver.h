@@ -10,7 +10,14 @@ public:
     void VMregister(VendingMachine *vendingmachine);
     VendingMachine *getMachine(unsigned int id);
     VendingMachine **getMachineList();
+    
+    ~NameServer();
 private:
+    Printer &prt;
+    VendingMachine **machineList;
+    int *machineForStudent;
+    uCondition waiting;
+    
     void main();
 };
 
