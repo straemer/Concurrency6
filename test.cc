@@ -5,6 +5,7 @@
 #include "printer.h"
 #include "nameserver.h"
 #include "vendingmachine.h"
+#include "bottlingplant.h"
 
 #include "MPRNG.h"
 
@@ -118,24 +119,6 @@ void testBank() {
     }
 }
 
-_Task NameServerRegisterer {
-public:
-    NameServerRegisterer(NameServer &nameServer, const vector<VendingMachine*> &vendingMachines) :
-        m_nameServer(nameServer),
-        m_vendingMachines(vendingMachines) {}
-
-private:
-    void main() {
-        yield(10);
-        for (size_t i=0; i<m_vendingMachines.size(); ++i) {
-            yield(10);
-            m_nameServer.VMregister(m_vendingMachines[i]);
-        }
-    }
-    NameServer &m_nameServer;
-    const vector<VendingMachine*> &m_vendingMachines;
-};
-
 _Task NameServerChecker {
 public:
     NameServerChecker(NameServer &nameServer, const vector<VendingMachine*> &vendingMachines,
@@ -172,7 +155,6 @@ void testNameServer() {
         vendingMachines[i] = new VendingMachine(printer, *nameServer, i, 1, 1);
     }
     {
-        NameServerRegisterer reg(*nameServer, vendingMachines);
         NameServerChecker checker(*nameServer, vendingMachines, numStudents);
     }
     delete nameServer;
@@ -228,12 +210,41 @@ void testVendingMachine() {
     Printer printer(numStudents, numVendingMachines, numCouriers);
     {
         NameServer nameServer(printer, numVendingMachines, numStudents);
-        VendingMachine machine(printer, nameServer, 1, 1, 1);
+        VendingMachine machine(printer, nameServer, 0, 1, 1);
         {
             volatile bool done = false;
             VendingMachineRestocker restocker(machine, done);
             VendingMachineBuyer buyer(machine, done);
         }
+    }
+}
+
+void testBottlingPlant() {
+    const unsigned numStudents = 1;
+    const unsigned numVendingMachines = 5;
+    const unsigned numCouriers = 1;
+    Printer printer(numStudents, numVendingMachines, numCouriers);
+    NameServer *nameServer = new NameServer(printer, numVendingMachines, numStudents);
+    vector<VendingMachine*> machines(numVendingMachines);
+    const unsigned maxShippedPerFlavour = 3;
+    const unsigned maxStockPerFlavour = 2;
+    const unsigned timeBetweenShipments = 3;
+    {
+        BottlingPlant plant(printer, *nameServer, numVendingMachines, maxShippedPerFlavour,
+                            maxStockPerFlavour, timeBetweenShipments);
+
+        for (unsigned int i=0; i<numVendingMachines; ++i) {
+            machines[i] = new VendingMachine(printer, *nameServer, i, 1, maxStockPerFlavour);
+        }
+        // I can't think of a better way to let this thing run for a bit of time...
+        sleep(2);
+    }
+    delete nameServer;
+
+    for (vector<VendingMachine*>::iterator it = machines.begin();
+         it != machines.end();
+         ++it) {
+        delete *it;
     }
 }
 
@@ -244,4 +255,5 @@ void uMain::main() {
     testBank();
     testNameServer();
     testVendingMachine();
+    testBottlingPlant();
 }

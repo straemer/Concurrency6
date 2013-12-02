@@ -1,6 +1,7 @@
 #include "vendingmachine.h"
 
 #include "watcard.h"
+#include "nameserver.h"
 
 VendingMachine::VendingMachine(Printer &prt, NameServer &nameServer, unsigned int id,
                                unsigned int sodaCost, unsigned int maxStockPerFlavour) :
@@ -38,6 +39,7 @@ void VendingMachine::restocked() {
 }
 
 void VendingMachine::main() {
+    m_nameServer.VMregister(this);
     for (;;) {
         _Accept(~VendingMachine) {
             break;
