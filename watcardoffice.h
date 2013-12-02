@@ -3,6 +3,7 @@
 
 #include "watcard.h"
 
+#include <queue>
 #include <vector>
 
 _Monitor Printer;
@@ -45,7 +46,6 @@ private:
     Printer &m_printer;
     Bank &m_bank;
     std::vector<Courier*>m_couriers;
-    const unsigned m_numCouriers;
 };
 
 #endif

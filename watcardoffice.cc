@@ -1,5 +1,9 @@
 #include "watcardoffice.h"
 
+#include "bank.h"
+
+#include "MPRNG.h"
+
 using namespace std;
 
 WATCardOffice::WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers) :
@@ -33,15 +37,17 @@ WATCard::FWATCard WATCardOffice::transfer(unsigned int sid, unsigned int amount,
 }
 
 WATCardOffice::Job *WATCardOffice::requestWork() {
-    while (m_jobs.empty()) {
-        _Accept(create, transfer);
-    }
     Job *ret = m_jobs.front();
     m_jobs.pop();
     return ret;
 }
 
 void WATCardOffice::main() {
+    for (;;) {
+        _Accept(~WATCardOffice, create, transfer) {
+        } or _When(!m_jobs.empty()) _Accept(requestWork) {
+        }
+    }
 }
 
 void WATCardOffice::Courier::main() {
@@ -54,7 +60,12 @@ void WATCardOffice::Courier::main() {
             //TODO: need to delete these guys somewhere.
         }
         card->deposit(job->amount);
-        job->result.delivery(card);
+        if (g_mprng(6) == 0) {
+            job->result.exception(new WATCardOffice::Lost);
+            //TODO: need to delete these somewhere...
+        } else {
+            job->result.delivery(card);
+        }
         delete job;
     }
 }
