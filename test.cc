@@ -6,6 +6,8 @@
 #include "nameserver.h"
 #include "vendingmachine.h"
 
+#include "MPRNG.h"
+
 #include <iostream>
 #include <vector>
 
@@ -181,10 +183,65 @@ void testNameServer() {
     }
 }
 
+_Task VendingMachineRestocker {
+public:
+    VendingMachineRestocker(VendingMachine &machine, volatile bool &done) :
+        m_machine(machine),
+        m_done(done) {}
+private:
+    void main() {
+        for (unsigned i=0; i<1000; ++i) {
+            unsigned *inv = m_machine.inventory();
+            for (unsigned i=0; i<4; ++i) {
+                inv[i] = 1;
+            }
+            m_machine.restocked();
+        }
+        m_done = true;
+    }
+    VendingMachine &m_machine;
+    volatile bool &m_done;
+};
+
+_Task VendingMachineBuyer {
+public:
+    VendingMachineBuyer(VendingMachine &machine, volatile bool &done) :
+        m_machine(machine),
+        m_done(done) {}
+private:
+    void main() {
+        WATCard card;
+        while (!m_done) {
+            yield(2);
+            card.deposit(1);
+            m_machine.buy(VendingMachine::Flavours(g_mprng(3)), card);
+        }
+    }
+    VendingMachine &m_machine;
+    volatile bool &m_done;
+};
+
+void testVendingMachine() {
+    const unsigned numStudents = 1;
+    const unsigned numVendingMachines = 1;
+    const unsigned numCouriers = 1;
+    Printer printer(numStudents, numVendingMachines, numCouriers);
+    {
+        NameServer nameServer(printer, numVendingMachines, numStudents);
+        VendingMachine machine(printer, nameServer, 1, 1, 1);
+        {
+            volatile bool done = false;
+            VendingMachineRestocker restocker(machine, done);
+            VendingMachineBuyer buyer(machine, done);
+        }
+    }
+}
+
 void uMain::main() {
     uProcessor p[16] __attribute__((unused));
 
     testWatCard();
     testBank();
     testNameServer();
+    testVendingMachine();
 }
