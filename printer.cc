@@ -86,7 +86,7 @@ void Printer::print(Kind kind, char state) {
 }
 
 void Printer::print(Kind kind, char state, int value1) {
-    unsigned int position = (unsigned int)kind; 
+    unsigned int position = (unsigned int)kind;
     stringstream sout;
     string s_state;
     sout << state << value1;                                                    // combine the char and int
@@ -105,7 +105,7 @@ void Printer::print(Kind kind, char state, int value1, int value2) {
 
 void Printer::print(Kind kind, unsigned int lid, char state) {
     unsigned int position = getPosition(kind, lid);                             // get the column position using getPosition
-    s_state = string(1, state);
+    string s_state = string(1, state);
     print_impl(position, s_state);
 }
 
