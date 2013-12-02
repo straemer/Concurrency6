@@ -7,6 +7,7 @@
 #include "vendingmachine.h"
 #include "bottlingplant.h"
 #include "parent.h"
+#include "watcardoffice.h"
 
 #include "MPRNG.h"
 
@@ -251,7 +252,7 @@ void testBottlingPlant() {
 
 void testParent() {
     const unsigned numStudents = 10;
-    const unsigned numVendingMachines = 5;
+    const unsigned numVendingMachines = 1;
     const unsigned numCouriers = 1;
     Printer printer(numStudents, numVendingMachines, numCouriers);
     Bank bank(numStudents);
@@ -259,6 +260,55 @@ void testParent() {
     {
         Parent parent(printer, bank, numStudents, parentalDelay);
         sleep(1);
+    }
+}
+
+_Task OfficeTester {
+public:
+    OfficeTester(WATCardOffice &office, unsigned numStudents) :
+        m_office(office),
+        m_numStudents(numStudents) {}
+private:
+    void main() {
+        for (unsigned i=0; i<m_numStudents; ++i) {
+            m_cards.push_back(m_office.create(i, 10));
+        }
+        for (unsigned i=0; i<10; ++i) {
+            unsigned id = i%m_numStudents;
+            try {
+                m_office.transfer(id, 10, m_cards[id]());
+            } catch(WATCardOffice::Lost &l) {
+                m_cards[id] = m_office.create(id, 10);
+            }
+        }
+        for (vector<WATCard::FWATCard>::iterator it = m_cards.begin();
+             it != m_cards.end();
+             ++it) {
+            try {
+                delete (*it)();
+                it->reset();
+            } catch(WATCardOffice::Lost&l) {
+                it->reset();
+            }
+        }
+    }
+    WATCardOffice &m_office;
+    unsigned m_numStudents;
+    vector<WATCard::FWATCard> m_cards;
+};
+
+void testOffice() {
+    const unsigned numStudents = 10;
+    const unsigned numVendingMachines = 1;
+    const unsigned numCouriers = 7;
+    Printer printer(numStudents, numVendingMachines, numCouriers);
+    Bank bank(numStudents);
+    Parent parent(printer, bank, numStudents, 0);
+    {
+        WATCardOffice office(printer, bank, numCouriers);
+        {
+            OfficeTester tester(office, numStudents);
+        }
     }
 }
 
@@ -271,4 +321,5 @@ void uMain::main() {
     testVendingMachine();
     testBottlingPlant();
     testParent();
+    testOffice();
 }

@@ -24,7 +24,7 @@ private:
             card(card) {}
     };
 public:
-    _Event Lost {};                        // uC++ exception type, like "struct"
+    _Event Lost {};
     WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers);
     virtual ~WATCardOffice();
     WATCard::FWATCard create(unsigned int sid, unsigned int amount);
@@ -46,6 +46,7 @@ private:
     Printer &m_printer;
     Bank &m_bank;
     std::vector<Courier*>m_couriers;
+    bool m_terminating;
 };
 
 #endif
