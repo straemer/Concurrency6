@@ -33,15 +33,17 @@ Printer::Printer(unsigned int numStudents, unsigned int numVendingMachines, unsi
 unsigned int Printer::getPosition(Kind kind, unsigned int lid) {                // method to give column number based off kind and id
     unsigned int position;
     switch (kind) {
-        case Student:
-            position = 5;                                                       // if student, skip first 5 columns
-            break;
-        case Vending:
-            position = 5 + numStudents;                                         // if vending machine, skip first 5 + students columns
-            break;
-        case Courier:
-            position = 5 + numStudents + numVendingMachines;                    // if courier, skip first 5 + students + vending machines columns
-            break;
+    case Student:
+        position = 5;                                                       // if student, skip first 5 columns
+        break;
+    case Vending:
+        position = 5 + numStudents;                                         // if vending machine, skip first 5 + students columns
+        break;
+    case Courier:
+        position = 5 + numStudents + numVendingMachines;                    // if courier, skip first 5 + students + vending machines columns
+        break;
+    default:
+        assert(false);
     }
     position += lid;                                                            // add id to go to correct column
     return position;
@@ -81,12 +83,14 @@ void Printer::print_impl(unsigned int position, std::string state) {            
 
 void Printer::print(Kind kind, char state) {
     unsigned int position = (unsigned int)kind;                                 // change kind to column position
+    assert(position<5);
     string s_state = string(1, state);                                          // change char state to string s_state
     print_impl(position, s_state);                                              // call the convenience method to print
 }
 
 void Printer::print(Kind kind, char state, int value1) {
     unsigned int position = (unsigned int)kind;
+    assert(position<5);
     stringstream sout;
     string s_state;
     sout << state << value1;                                                    // combine the char and int
@@ -96,6 +100,7 @@ void Printer::print(Kind kind, char state, int value1) {
 
 void Printer::print(Kind kind, char state, int value1, int value2) {
     unsigned int position = (unsigned int)kind;
+    assert(position<5);
     stringstream sout;
     string s_state;
     sout << state << value1 << "," << value2;                                   // combine the char and the two ints

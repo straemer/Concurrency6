@@ -9,7 +9,6 @@ NameServer::NameServer(Printer &prt, unsigned int numVendingMachines, unsigned i
     numVendingMachines(numVendingMachines),
     numRegisteredMachines(0)
 {
-    prt.print(Printer::NameServer, 'S');
     for (unsigned int i = 0; i < numVendingMachines; i++) {
         machineList[i] = NULL;                                                  // all values intially point to NULL
     }
@@ -37,6 +36,7 @@ VendingMachine **NameServer::getMachineList() {
 }
 
 void NameServer::main() {
+    prt.print(Printer::NameServer, 'S');
     for (;;) {
         _Accept(~NameServer) {
             break;

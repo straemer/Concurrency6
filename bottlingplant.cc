@@ -1,6 +1,7 @@
 #include "bottlingplant.h"
 
 #include "truck.h"
+#include "printer.h"
 
 #include "MPRNG.h"
 
@@ -29,6 +30,7 @@ bool BottlingPlant::getShipment(unsigned int cargo[]) {
             cargo[i] = m_production;
         }
         m_productionCondition.signal();
+        m_printer.print(Printer::BottlingPlant, 'P');
         return false;
     } else {
         m_terminationStatus |= TruckNotified;
@@ -41,10 +43,12 @@ bool BottlingPlant::getShipment(unsigned int cargo[]) {
 }
 
 void BottlingPlant::main() {
+    m_printer.print(Printer::BottlingPlant, 'S');
     Truck truck(m_printer, m_nameServer, *this, m_numVendingMachines, m_maxStockPerFlavour);
     for (;;) {
         yield(m_timeBetweenShipments);
         m_production = g_mprng(m_maxShippedPerFlavour);
+        m_printer.print(Printer::BottlingPlant, 'G', m_production);
         m_productionCondition.wait();
 
         if (m_terminationStatus != NotTerminating) {
@@ -56,4 +60,5 @@ void BottlingPlant::main() {
         m_productionCondition.wait();
     }
     m_terminateCondition.signal();
+    m_printer.print(Printer::BottlingPlant, 'F');
 }

@@ -33,11 +33,16 @@ public:
 private:
     _Task Courier {
     public:
-        Courier(WATCardOffice &office) : m_office(office) {}
+        Courier(Printer &printer, WATCardOffice &office, unsigned id) :
+            m_printer(printer),
+            m_office(office),
+            m_id(id){}
     private:
         void main();
 
+        Printer &m_printer;
         WATCardOffice &m_office;
+        const unsigned m_id;
     };                 // communicates with bank
 
     void main();

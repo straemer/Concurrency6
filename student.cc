@@ -7,15 +7,13 @@
 #include "MPRNG.h"
 
 Student::Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id,
-                 unsigned int maxPurchases) : prt(prt), nameServer(nameServer), cardOffice(cardOffice), id(id), bottlesPurchased(0) {
-    bottlesToPurchase = g_mprng(1, maxPurchases);   // set bottles to purchase between 1 and maxPurchases
-    favouriteFlavour = (VendingMachine::Flavours)g_mprng(0, 3);   // set random flavour
-    fCard = cardOffice.create(id, 5);   // create a WATCard (returns a FWATCard)
-
-    prt.print(Printer::Student, id, 'S', (unsigned int)favouriteFlavour, bottlesToPurchase);
-    machine = nameServer.getMachine(id);    // obtain vending machine
-    prt.print(Printer::Student, id, 'V', machine->getId());
-}
+                 unsigned int maxPurchases) :
+    prt(prt),
+    nameServer(nameServer),
+    cardOffice(cardOffice),
+    id(id),
+    bottlesPurchased(0),
+    bottlesToPurchase(g_mprng(1,maxPurchases)) {}
 
 Student::~Student() {
     if (fCard.available()) {
@@ -24,6 +22,14 @@ Student::~Student() {
 }
 
 void Student::main() {
+    prt.print(Printer::Student, id, 'S', (unsigned int)favouriteFlavour, bottlesToPurchase);
+
+    favouriteFlavour = (VendingMachine::Flavours)g_mprng(3);   // set random flavour
+    fCard = cardOffice.create(id, 5);   // create a WATCard (returns a FWATCard)
+
+    machine = nameServer.getMachine(id);    // obtain vending machine
+    prt.print(Printer::Student, id, 'V', machine->getId());
+
     while (bottlesPurchased < bottlesToPurchase) {
         yield(g_mprng(1, 10));  // yield between 1 and 10
         bool retrying = false;

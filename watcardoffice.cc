@@ -1,6 +1,7 @@
 #include "watcardoffice.h"
 
 #include "bank.h"
+#include "printer.h"
 
 #include "MPRNG.h"
 
@@ -12,10 +13,8 @@ WATCardOffice::WATCardOffice(Printer &prt, Bank &bank, unsigned int numCouriers)
     m_couriers(numCouriers),
     m_terminating(false)
 {
-    for (vector<Courier*>::iterator it = m_couriers.begin();
-         it != m_couriers.end();
-         ++it) {
-        *it = new Courier(*this);
+    for (unsigned i=0; i<numCouriers; ++i) {
+        m_couriers[i] = new Courier(m_printer, *this, i);
     }
 }
 
@@ -40,11 +39,13 @@ WATCardOffice::~WATCardOffice() {
 
 WATCard::FWATCard WATCardOffice::create(unsigned int sid, unsigned int amount) {
     m_jobs.push(new Job(m_bank, sid, amount));
+    m_printer.print(Printer::WATCardOffice, 'C', sid, amount);
     return m_jobs.back()->result;
 }
 
 WATCard::FWATCard WATCardOffice::transfer(unsigned int sid, unsigned int amount, WATCard *card) {
     m_jobs.push(new Job(m_bank, sid, amount, card));
+    m_printer.print(Printer::WATCardOffice, 'T', sid, amount);
     return m_jobs.back()->result;
 }
 
@@ -54,10 +55,12 @@ WATCardOffice::Job *WATCardOffice::requestWork() {
     }
     Job *ret = m_jobs.front();
     m_jobs.pop();
+    m_printer.print(Printer::WATCardOffice, 'W');
     return ret;
 }
 
 void WATCardOffice::main() {
+    m_printer.print(Printer::WATCardOffice, 'S');
     for (;;) {
         _Accept(~WATCardOffice) {
             m_terminating = true;
@@ -75,6 +78,7 @@ void WATCardOffice::main() {
 }
 
 void WATCardOffice::Courier::main() {
+    m_printer.print(Printer::Courier, m_id, 'S');
     for (;;) {
         _Accept(~Courier) {
             break;
@@ -85,6 +89,9 @@ void WATCardOffice::Courier::main() {
                     break;
                 }
             }
+            if (job->card != NULL) {
+                m_printer.print(Printer::Courier, m_id, 't', job->studentId, job->amount);
+            }
             job->bank.withdraw(job->studentId, job->amount);
             WATCard *card = job->card;
             if (g_mprng(6) == 0) {
@@ -93,12 +100,12 @@ void WATCardOffice::Courier::main() {
                 }
                 job->result.reset();
                 job->result.exception(new WATCardOffice::Lost);
-                //TODO: need to delete these somewhere...
             } else {
                 if (card == NULL) {
                     card = new WATCard;
-                    //TODO: need to delete these guys somewhere.
+                    m_printer.print(Printer::Courier, m_id, 'T', job->studentId, job->amount);
                 }
+
                 card->deposit(job->amount);
                 if (job->result.available() && job->result() != card) {
                     delete job->result();
