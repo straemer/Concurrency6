@@ -1,7 +1,9 @@
 #include "student.h"
+
 #include "printer.h"
 #include "nameserver.h"
 #include "watcardoffice.h"
+
 #include "MPRNG.h"
 
 Student::Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id,
@@ -13,6 +15,12 @@ Student::Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice
     prt.print(Printer::Student, id, 'S', (unsigned int)favouriteFlavour, bottlesToPurchase);
     machine = nameServer.getMachine(id);    // obtain vending machine
     prt.print(Printer::Student, id, 'V', machine->getId());
+}
+
+Student::~Student() {
+    if (fCard.available()) {
+        delete fCard();
+    }
 }
 
 void Student::main() {

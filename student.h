@@ -13,6 +13,7 @@ _Task Student {
 public:
     Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice, unsigned int id,
             unsigned int maxPurchases);
+    virtual ~Student();
 private:
     Printer &prt;
     NameServer &nameServer;

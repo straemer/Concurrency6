@@ -35,7 +35,6 @@ unsigned int *VendingMachine::inventory() {
 }
 
 void VendingMachine::restocked() {
-    m_restocking = false;
 }
 
 void VendingMachine::main() {
@@ -44,6 +43,7 @@ void VendingMachine::main() {
         _Accept(~VendingMachine) {
             break;
         } or _When (m_restocking) _Accept(restocked) {
+            m_restocking = false;
         } or _When (!m_restocking) _Accept(buy, inventory) {
         }
     }

@@ -8,6 +8,7 @@
 #include "bottlingplant.h"
 #include "parent.h"
 #include "watcardoffice.h"
+#include "student.h"
 
 #include "MPRNG.h"
 
@@ -312,6 +313,22 @@ void testOffice() {
     }
 }
 
+void testStudent() {
+    const unsigned numStudents = 1;
+    const unsigned numVendingMachines = 1;
+    const unsigned numCouriers = 7;
+    Printer printer(numStudents, numVendingMachines, numCouriers);
+    NameServer nameServer(printer, numVendingMachines, numStudents);
+    Bank bank(numStudents);
+    WATCardOffice office(printer, bank, numCouriers);
+    VendingMachine machine(printer, nameServer, 0, 1, 1);
+    BottlingPlant plant(printer, nameServer, numVendingMachines, 1, 1, 1);
+    Parent parent(printer, bank, numStudents, 1);
+    {
+        Student student(printer, nameServer, office, 0, 30);
+    }
+}
+
 void uMain::main() {
     uProcessor p[16] __attribute__((unused));
 
@@ -322,4 +339,5 @@ void uMain::main() {
     testBottlingPlant();
     testParent();
     testOffice();
+    testStudent();
 }
