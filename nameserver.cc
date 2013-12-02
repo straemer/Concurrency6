@@ -6,8 +6,8 @@ NameServer::NameServer(Printer &prt, unsigned int numVendingMachines, unsigned i
     prt(prt),
     machineList(new VendingMachine*[numVendingMachines]),
     machineForStudent(numStudents),
-    waiting(new uCondition[numVendingMachines]),
-    numVendingMachines(numVendingMachines)
+    numVendingMachines(numVendingMachines),
+    numRegisteredMachines(0)
 {
     prt.print(Printer::NameServer, 'S');
     for (unsigned int i = 0; i < numVendingMachines; i++) {
@@ -22,35 +22,34 @@ void NameServer::VMregister(VendingMachine *vendingMachine) {
     unsigned int machineId = vendingMachine->getId();                           // to reduce the number of times we call this function
     machineList[machineId] = vendingMachine;
     prt.print(Printer::NameServer, 'R', machineId);
-    while (!waiting[machineId].empty()) {
-        waiting[machineId].signal();
-    }
 }
 
 VendingMachine *NameServer::getMachine(unsigned int id) {
     machineForStudent[id] = (machineForStudent[id] + 1) % numVendingMachines;   // go to the next machine
-    if (!machineList[machineForStudent[id]]) {                                  // could've used if, but while is easier
-        waiting[id].wait();                                                         // block if machine is not registered yet
-    }
     prt.print(Printer::NameServer, 'N', id, machineForStudent[id]);
     return machineList[machineForStudent[id]];
 }
 
 VendingMachine **NameServer::getMachineList() {
     for (unsigned int i = 0; i < numVendingMachines; i++) {                     // make sure all machines are registered
-        if (!machineList[i]) {
-            waiting[i].wait();                                                  // block if NULL
-        }
     }
     return machineList;
 }
 
 void NameServer::main() {
-    // There has to be something here...
+    for (;;) {
+        _Accept(~NameServer) {
+            break;
+        } or _Accept(VMregister) {
+            ++numRegisteredMachines;
+            assert(numRegisteredMachines <= numVendingMachines);
+        } or _When(numRegisteredMachines == numVendingMachines)
+              _Accept(getMachine, getMachineList) {
+        }
+    }
+    prt.print(Printer::NameServer, 'F');
 }
 
 NameServer::~NameServer() {
-    delete [] waiting;
     delete [] machineList;
-    prt.print(Printer::NameServer, 'F');
 }

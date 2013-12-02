@@ -19,8 +19,8 @@ private:
     VendingMachine **machineList;
 
     std::vector<int> machineForStudent;
-    uCondition *waiting;
     unsigned numVendingMachines;
+    unsigned numRegisteredMachines;
 
     void main();
 };

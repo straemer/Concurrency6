@@ -2,6 +2,9 @@
 
 #include "watcard.h"
 #include "bank.h"
+#include "printer.h"
+#include "nameserver.h"
+#include "vendingmachine.h"
 
 #include <iostream>
 #include <vector>
@@ -113,9 +116,75 @@ void testBank() {
     }
 }
 
+_Task NameServerRegisterer {
+public:
+    NameServerRegisterer(NameServer &nameServer, const vector<VendingMachine*> &vendingMachines) :
+        m_nameServer(nameServer),
+        m_vendingMachines(vendingMachines) {}
+
+private:
+    void main() {
+        yield(10);
+        for (size_t i=0; i<m_vendingMachines.size(); ++i) {
+            yield(10);
+            m_nameServer.VMregister(m_vendingMachines[i]);
+        }
+    }
+    NameServer &m_nameServer;
+    const vector<VendingMachine*> &m_vendingMachines;
+};
+
+_Task NameServerChecker {
+public:
+    NameServerChecker(NameServer &nameServer, const vector<VendingMachine*> &vendingMachines,
+                      unsigned numStudents) :
+        m_nameServer(nameServer),
+        m_vendingMachines(vendingMachines),
+        m_numStudents(numStudents) {}
+private:
+    void main() {
+        for (size_t i=0; i<m_numStudents; ++i) {
+            VendingMachine *machine = m_nameServer.getMachine(i);
+            if (machine != m_vendingMachines[(i+1)%m_vendingMachines.size()]) {
+                osacquire(cout) << "wrong vending machine! got: " << (void*)machine <<
+                    ", expected: " << (void*)m_vendingMachines[(i+1)%m_vendingMachines.size()] <<
+                    endl;
+                assert(false);
+            }
+        }
+    }
+    NameServer &m_nameServer;
+    const vector<VendingMachine*> &m_vendingMachines;
+    const unsigned m_numStudents;
+};
+
+void testNameServer() {
+    const unsigned numStudents = 13;
+    const unsigned numVendingMachines = 5;
+    const unsigned numCouriers = 1;
+    Printer printer(numStudents, numVendingMachines, numCouriers);
+    NameServer *nameServer = new NameServer(printer, numVendingMachines, numStudents);
+
+    vector<VendingMachine*> vendingMachines(numVendingMachines);
+    for (unsigned i=0; i<numVendingMachines; ++i) {
+        vendingMachines[i] = new VendingMachine(printer, *nameServer, i, 1, 1);
+    }
+    {
+        NameServerRegisterer reg(*nameServer, vendingMachines);
+        NameServerChecker checker(*nameServer, vendingMachines, numStudents);
+    }
+    delete nameServer;
+    for (vector<VendingMachine*>::iterator it = vendingMachines.begin();
+         it != vendingMachines.end();
+         ++it) {
+        delete *it;
+    }
+}
+
 void uMain::main() {
     uProcessor p[16] __attribute__((unused));
 
     testWatCard();
     testBank();
+    testNameServer();
 }

@@ -38,7 +38,11 @@ void VendingMachine::restocked() {
 }
 
 void VendingMachine::main() {
-    _When (m_restocking) _Accept(restocked) {
-    } _Else _Accept(buy, inventory) {
+    for (;;) {
+        _Accept(~VendingMachine) {
+            break;
+        } or _When (m_restocking) _Accept(restocked) {
+        } or _When (!m_restocking) _Accept(buy, inventory) {
+        }
     }
 }
