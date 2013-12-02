@@ -6,6 +6,7 @@
 #include "nameserver.h"
 #include "vendingmachine.h"
 #include "bottlingplant.h"
+#include "parent.h"
 
 #include "MPRNG.h"
 
@@ -237,7 +238,7 @@ void testBottlingPlant() {
             machines[i] = new VendingMachine(printer, *nameServer, i, 1, maxStockPerFlavour);
         }
         // I can't think of a better way to let this thing run for a bit of time...
-        sleep(2);
+        sleep(1);
     }
     delete nameServer;
 
@@ -245,6 +246,19 @@ void testBottlingPlant() {
          it != machines.end();
          ++it) {
         delete *it;
+    }
+}
+
+void testParent() {
+    const unsigned numStudents = 10;
+    const unsigned numVendingMachines = 5;
+    const unsigned numCouriers = 1;
+    Printer printer(numStudents, numVendingMachines, numCouriers);
+    Bank bank(numStudents);
+    const unsigned parentalDelay = 3;
+    {
+        Parent parent(printer, bank, numStudents, parentalDelay);
+        sleep(1);
     }
 }
 
@@ -256,4 +270,5 @@ void uMain::main() {
     testNameServer();
     testVendingMachine();
     testBottlingPlant();
+    testParent();
 }

@@ -20,7 +20,7 @@ void Parent::main() {
             yield(m_delay);
 
             unsigned giftAmount = g_mprng(1,3);
-            unsigned giftee = g_mprng(m_numStudents);
+            unsigned giftee = g_mprng(m_numStudents-1);
 
             m_printer.print(Printer::Parent, 'D', giftee, giftAmount);
 
