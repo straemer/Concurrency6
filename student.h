@@ -23,7 +23,7 @@ private:
     unsigned int bottlesPurchased;
     unsigned int bottlesToPurchase;
     VendingMachine::Flavours favouriteFlavour;
-    
+
     void main();
 };
 
