@@ -35,6 +35,7 @@ void Student::main() {
         bool retrying = false;
         VendingMachine::Status status;
         do {
+            retrying = false;
             try {
                 status = machine->buy(favouriteFlavour, *fCard());   // attempt to buy and store status
             } catch (WATCardOffice::Lost) {

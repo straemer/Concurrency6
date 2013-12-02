@@ -24,7 +24,9 @@ void Truck::main() {
     for (;;) {
         yield(g_mprng(1,10));
         if (m_plant.getShipment(cargo)) {
-            break;
+            _Accept(~Truck) {
+                break;
+            }
         }
         unsigned deliverySize = 0;
         for (unsigned i=0; i<4; ++i) {
