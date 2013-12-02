@@ -9,6 +9,7 @@ Student::Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice
     bottlesToPurchase = g_mprng(1, maxPurchases);   // set bottles to purchase between 1 and maxPurchases
     favouriteFlavour = (VendingMachine::Flavours)g_mprng(0, 3);   // set random flavour
     fCard = cardOffice.create(id, 5);   // create a WATCard (returns a FWATCard)
+
     prt.print(Printer::Student, id, 'S', (unsigned int)favouriteFlavour, bottlesToPurchase);
     machine = nameServer.getMachine(id);    // obtain vending machine
     prt.print(Printer::Student, id, 'V', machine->getId());
@@ -29,7 +30,7 @@ void Student::main() {
         } while (retrying);
         switch (status) {
             case VendingMachine::BUY:
-                prt.print(Printer::Student, id, 'B', fCard()->getBalance());
+                prt.print(Printer::Student, id, 'B', ((WATCard*)fCard)->getBalance());
                 bottlesPurchased++;     // increment bottles purchased
                 break;
             case VendingMachine::STOCK:
@@ -37,7 +38,7 @@ void Student::main() {
                 prt.print(Printer::Student, id, 'V', machine->getId());
                 break;
             case VendingMachine::FUNDS:
-                fCard = cardOffice.transfer(id, machine->cost() + 5, fCard());  // transfer 5 + cost to watcard
+                fCard = cardOffice.transfer(id, machine->cost() + 5, fCard);  // transfer 5 + cost to watcard
                 break;
         }
     }
