@@ -16,8 +16,9 @@ Student::Student(Printer &prt, NameServer &nameServer, WATCardOffice &cardOffice
     bottlesToPurchase(g_mprng(1,maxPurchases)) {}
 
 Student::~Student() {
-    if (fCard.available()) {
+    try {
         delete fCard();
+    } catch (WATCardOffice::Lost&) {
     }
 }
 

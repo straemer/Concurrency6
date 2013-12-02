@@ -25,11 +25,8 @@ WATCardOffice::~WATCardOffice() {
         delete *it;
     }
     while(!m_jobs.empty()) {
-        try {
-            if (m_jobs.front()->result.available()) {
-                delete m_jobs.front()->result();
-            }
-        } catch(Lost&) {
+        if (!m_jobs.front()->result.available()) {
+            m_jobs.front()->result.delivery(NULL);
         }
         m_jobs.front()->result.reset();
         delete m_jobs.front();
@@ -94,23 +91,17 @@ void WATCardOffice::Courier::main() {
             }
             job->bank.withdraw(job->studentId, job->amount);
             WATCard *card = job->card;
-            if (g_mprng(6) == 0) {
-                if (job->result.available()) {
-                    delete job->result();
-                }
-                job->result.reset();
+            if (g_mprng(5) == 0) {
+                delete card;
                 job->result.exception(new WATCardOffice::Lost);
             } else {
                 if (card == NULL) {
                     card = new WATCard;
+                } else {
                     m_printer.print(Printer::Courier, m_id, 'T', job->studentId, job->amount);
                 }
 
                 card->deposit(job->amount);
-                if (job->result.available() && job->result() != card) {
-                    delete job->result();
-                }
-                job->result.reset();
                 job->result.delivery(card);
             }
             delete job;
